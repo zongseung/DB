@@ -1,0 +1,16 @@
+# uv / Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# 로컬 환경
+.env
+.env.local

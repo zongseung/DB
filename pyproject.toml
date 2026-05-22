@@ -1,0 +1,13 @@
+[project]
+name = "energy-hub-db"
+version = "0.1.0"
+description = "Energy Hub 2024-Q1 통합 데이터셋 (전국 전력수급·기상·발전량·열수요·연료비)"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "duckdb>=1.5.3",
+    "pandas>=3.0.3",
+    "polars>=1.40.1",
+    "psycopg2-binary>=2.9.12",
+    "pyarrow>=24.0.0",
+]
