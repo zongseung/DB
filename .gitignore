@@ -14,3 +14,6 @@ __pycache__/
 # 로컬 환경
 .env
 .env.local
+
+# CSV 출력물 (필요 시 export_to_csv.py로 재생성)
+csv/

@@ -16,11 +16,9 @@
 │
 ├── energy_q1_2024.duckdb      ← 12개 테이블 통합 DB (5 MB) ★권장
 ├── parquet/                   ← 테이블별 12개 .parquet (2 MB)
-├── csv/                       ← 테이블별 12개 .csv (23 MB, 엑셀용)
 │
 └── scripts/
-    ├── export_q1_dataset.py   ← DB/NAS → parquet+duckdb 재생성
-    └── export_to_csv.py       ← duckdb → csv 재생성
+    └── export_q1_dataset.py   ← DB/NAS → parquet+duckdb 재생성
 ```
 
 ### 데이터 12개 테이블 한눈에
@@ -220,13 +218,9 @@ SELECT datetime + INTERVAL (hour) HOUR AS ts, generation FROM namdong_generation
 
 ---
 
-## 🚀 빠른 시작 — 5분 안에 데이터 보기
+## 🚀 빠른 시작
 
-### 가장 간단한 방법: CSV를 엑셀에서 바로 열기
-
-`csv/` 폴더 안 12개 `.csv` 파일을 더블클릭. utf-8-sig BOM 적용돼 있어서 **한글 깨짐 없음**.
-
-### Python으로 보고 싶다면 → 아래 "환경 설정" 으로
+Python 환경 설정은 아래 "환경 설정" 섹션을 따라가세요. DuckDB CLI만으로도 SQL 쿼리 가능 — 아래 "사용 예시" 참고.
 
 ---
 
@@ -355,30 +349,15 @@ df["timestamp"] = pd.to_datetime(df["timestamp"])
 df.set_index("timestamp")["current_demand"].plot()
 ```
 
-### ④ R / Excel / 기타 도구
+### ④ R / 기타 도구
 
-- **R**: `arrow::read_parquet("parquet/demand_1h.parquet")` 또는 `read.csv("csv/demand_1h.csv", fileEncoding="UTF-8")`
-- **Excel**: `csv/*.csv` 더블클릭 (BOM 적용돼서 한글 OK)
-- **Tableau / Power BI**: parquet 또는 csv 그대로 import
+- **R**: `arrow::read_parquet("parquet/demand_1h.parquet")` 또는 `duckdb::dbConnect(duckdb::duckdb(), "energy_q1_2024.duckdb")`
+- **Tableau / Power BI**: parquet 그대로 import (DuckDB 커넥터도 있음)
+- **DBeaver / DataGrip**: DuckDB JDBC 드라이버로 `energy_q1_2024.duckdb` 직접 열기
 
 ---
 
-## 🔁 데이터 재생성 (옵션)
-
-### CSV만 다시 만들기 (duckdb만 있으면 됨)
-
-```bash
-# 전체 12개 다시
-uv run python scripts/export_to_csv.py
-
-# 일부만
-uv run python scripts/export_to_csv.py --only demand_5min,demand_weather_1h
-
-# gzip 압축 (23 MB → ~5 MB)
-uv run python scripts/export_to_csv.py --gzip
-```
-
-### DB 처음부터 재추출 (서버에서만 가능)
+## 🔁 데이터 재생성 (서버에서만 가능)
 
 ```bash
 uv run python scripts/export_q1_dataset.py
@@ -388,7 +367,7 @@ uv run python scripts/export_q1_dataset.py
 - Docker 컨테이너: `demand-postgres:5433`, `pv-data-postgres:5436`
 - NAS 마운트: `/home/dlwhdtmd/seri-data/Oil+weather/`
 
-타 머신(맥북 등)에 옮겨서 쓸 때는 **재추출 불가**. 이미 있는 duckdb/parquet/csv만 읽으세요.
+타 머신(맥북 등)에 옮겨서 쓸 때는 **재추출 불가**. 이미 있는 duckdb/parquet만 읽기 전용으로 사용.
 
 ---
 
@@ -399,7 +378,6 @@ uv run python scripts/export_q1_dataset.py
 | `uv: command not found` | 설치 후 쉘 재시작 안 함 → `source ~/.local/bin/env` 또는 새 터미널 |
 | `uv sync` 시 Python 3.12 다운로드가 느림 | 첫 실행만 그럼. 한 번 받으면 캐시됨 |
 | `psycopg2-binary` 설치 실패 (Mac M1) | `brew install postgresql` 후 재시도, 또는 `uv add psycopg2-binary --no-binary` |
-| 엑셀에서 한글이 깨짐 | CSV는 utf-8-sig라 정상. 엑셀이 utf-8 모드면 OK. 안 되면 Numbers/LibreOffice로 시도 |
 | DuckDB가 "database is locked" | 같은 파일을 다른 프로세스가 쓰기 모드로 열고 있음. `read_only=True` 사용 |
 | 스크립트 실행 시 `connection refused` | Docker DB 컨테이너가 안 떠 있거나 다른 머신에서 실행 중. 서버에서만 동작 |
 
